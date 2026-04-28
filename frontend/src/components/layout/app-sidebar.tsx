@@ -26,6 +26,7 @@ import {
 import { navGroups } from '@/config/nav-config';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { useFilteredNavGroups } from '@/hooks/use-nav';
+import type { NavGroup } from '@/types';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import * as React from 'react';
@@ -34,7 +35,64 @@ import { Icons } from '../icons';
 export default function AppSidebar() {
   const pathname = usePathname();
   const { isOpen } = useMediaQuery();
-  const filteredGroups = useFilteredNavGroups(navGroups);
+
+  const dynamicGroups = React.useMemo<NavGroup[]>(() => {
+    const cohortMatch = pathname.match(/^\/dashboard\/cohorts\/([^/]+)/);
+    const cohortId = cohortMatch?.[1];
+    if (!cohortId) return navGroups;
+    return [
+      ...navGroups,
+      {
+        label: '교육과정',
+        items: [
+          {
+            title: '모집',
+            url: `/dashboard/cohorts/${cohortId}/recruitment`,
+            icon: 'teams',
+            isActive: false,
+            items: []
+          },
+          {
+            title: '선발',
+            url: `/dashboard/cohorts/${cohortId}/selection`,
+            icon: 'checks',
+            isActive: false,
+            items: []
+          },
+          {
+            title: '출결',
+            url: `/dashboard/cohorts/${cohortId}/attendance`,
+            icon: 'calendar',
+            isActive: false,
+            items: []
+          },
+          {
+            title: '과제',
+            url: `/dashboard/cohorts/${cohortId}/assignments`,
+            icon: 'forms',
+            isActive: false,
+            items: []
+          },
+          {
+            title: '수료',
+            url: `/dashboard/cohorts/${cohortId}/completion`,
+            icon: 'circleCheck',
+            isActive: false,
+            items: []
+          },
+          {
+            title: '인증',
+            url: `/dashboard/cohorts/${cohortId}/certification`,
+            icon: 'badgeCheck',
+            isActive: false,
+            items: []
+          }
+        ]
+      }
+    ];
+  }, [pathname]);
+
+  const filteredGroups = useFilteredNavGroups(dynamicGroups);
 
   React.useEffect(() => {
     // Side effects based on sidebar state changes
